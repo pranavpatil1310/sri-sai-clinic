@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Doctor Portal & Clinic Administration - Sri Sai Clinic</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body id="doctor-page">
+
+  <div class="role-nav">
+    <span><strong>Active View:</strong> Chief Dermatologist Consultation & Administration</span>
+    <div class="role-links">
+      <a href="index.html">Patient Site</a>
+      <a href="receptionist.html">Receptionist</a>
+      <a href="doctor.html" class="active">Doctor Portal</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Active Consultation Queue -->
+    <div class="portal-card">
+      <div style="margin-bottom:16px;">
+        <h2 style="font-family:var(--font-serif); font-size:1.5rem;">Active Consultation Queue</h2>
+        <p style="color:var(--text-muted); font-size:0.85rem;">Patients waiting for consultation. Select disease protocol to auto-load prescription, edit if needed, and print.</p>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Patient Details</th>
+              <th>Slot & Service</th>
+              <th style="width: 50%;">Clinical Diagnosis & Auto Prescription Engine</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="doctorTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Completed Patient History Archive -->
+    <div class="portal-card" style="margin-top: 28px;">
+      <div style="margin-bottom:12px;">
+        <h3 style="font-family:var(--font-serif); font-size:1.25rem;">Completed Consultation History</h3>
+        <p style="color:var(--text-muted); font-size:0.8rem; margin:0;">Past completed consultations. Re-print physical prescription copies at any time.</p>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Patient ID & Name</th>
+              <th>Date & Slot</th>
+              <th>Diagnosis / Notes</th>
+              <th>Prescribed Medicines</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="doctorHistoryTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Administrative Management Panels -->
+    <div style="margin-top: 48px; border-top: 2px dashed var(--border-color); padding-top: 32px;">
+      <h2 style="font-family:var(--font-serif); color:var(--primary-green); margin-bottom:8px;">Clinic Content & Protocol Administration</h2>
+      <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:24px;">Manage auto-fill disease protocols, upload Excel sheets, edit premises, and update doctor profiles.</p>
+
+      <!-- 1. DISEASE & TABLET PRESETS WITH EXCEL UPLOAD -->
+      <div class="portal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem;">Disease & Tablet Presets (Auto-Fill Engine)</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Upload your spreadsheet (.xlsx / .csv) or add protocols manually.</p>
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" />
+            <button class="btn-outline" onclick="document.getElementById('excelFileInput').click()">📁 Import Excel / CSV</button>
+            <button class="btn-main" style="padding:8px 14px; font-size:0.85rem;" onclick="openAddPresetModal()">+ Add New Disease Protocol</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Disease Name</th>
+                <th>Default Clinical Notes</th>
+                <th>Prescribed Medicines</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPresetsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. HOSPITAL PREMISES & INFRASTRUCTURE MANAGER -->
+      <div class="portal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem;">Hospital Premises & Room Highlights</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Edit clinic photos, room titles, descriptions, and safety checklists without code.</p>
+          </div>
+          <button class="btn-main" style="padding:8px 14px; font-size:0.85rem;" onclick="openAddPremiseModal()">+ Add New Room / Area</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Tag / Category</th>
+                <th>Room Title</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminPremisesBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. DOCTOR PROFILES WITH EDIT & PHOTO UPLOAD -->
+      <div class="portal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem;">Doctor Profiles</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Manage doctors appearing on the website.</p>
+          </div>
+          <button class="btn-main" style="padding:8px 14px; font-size:0.85rem;" onclick="openAddDoctorModal()">+ Add New Doctor</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Doctor Name</th>
+                <th>Qualifications</th>
+                <th>Timings</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminDoctorsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 4. SERVICES & TREATMENTS WITH EDIT -->
+      <div class="portal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem;">Services & Treatments</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Manage treatments displayed on the patient website.</p>
+          </div>
+          <button class="btn-main" style="padding:8px 14px; font-size:0.85rem;" onclick="openAddTreatmentModal()">+ Add New Service</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Badge</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminTreatmentsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 5. BEFORE & AFTER RESULTS WITH EDIT & PHOTO UPLOAD -->
+      <div class="portal-card">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+          <div>
+            <h3 style="font-family:var(--font-serif); font-size:1.2rem;">Before & After Results</h3>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin:0;">Add and edit case studies shown to prospective patients.</p>
+          </div>
+          <button class="btn-main" style="padding:8px 14px; font-size:0.85rem;" onclick="openAddResultModal()">+ Add Case Study</button>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Treatment Title</th>
+                <th>Procedure Details</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="adminResultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Hospital Premises Room -->
+  <div id="addPremiseModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAddPremiseModal()">&times;</button>
+      <h3 id="premiseModalTitle" style="font-family:var(--font-serif); margin-bottom:16px;">Add Hospital Premise Room</h3>
+      <form id="addPremiseForm" class="booking-form">
+        <input type="hidden" id="editPremiseId" value="" />
+        <div class="form-group">
+          <label style="color:#333;">Badge / Tag</label>
+          <input type="text" id="newPremiseTag" required placeholder="e.g. Laser Suite" />
+        </div>
+        <div class="form-group">
+          <label style="color:#333;">Room Title</label>
+          <input type="text" id="newPremiseTitle" required placeholder="e.g. Sterile Advanced Laser Suite" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Description</label>
+          <textarea id="newPremiseDesc" required placeholder="Room features, temperature regulation, and equipment setup..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Checklist Points (One per line)</label>
+          <textarea id="newPremiseChecklist" placeholder="UV-sterilized surfaces&#10;Protective eyewear provided&#10;Calibrated monitors" style="height:80px;"></textarea>
+        </div>
+        <div class="form-group full">
+          <label style="color:#333; font-weight:600;">Upload Room Photo</label>
+          <input type="file" id="newPremisePhotoFile" accept="image/*" />
+          <small id="premisePhotoHint" style="display:none; color:#666; font-size:0.75rem;">Leave empty to keep existing photo</small>
+        </div>
+        <button type="submit" id="premiseSubmitBtn" class="btn-submit" style="background:var(--primary-green); color:#fff;">Save Room Details</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Custom Disease Protocol -->
+  <div id="addPresetModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="modal-close" onclick="closeAddPresetModal()">&times;</button>
+      <h3 style="font-family:var(--font-serif); margin-bottom:16px;">Add Disease Protocol Preset</h3>
+      <form id="addPresetForm" class="booking-form">
+        <div class="form-group full">
+          <label style="color:#333;">Disease / Condition Name</label>
+          <input type="text" id="newPresetDisease" required placeholder="e.g. Seborrheic Dermatitis" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Standard Clinical Diagnosis Notes</label>
+          <textarea id="newPresetNotes" required placeholder="Standard observations and instructions..."></textarea>
+        </div>
+        <div class="form-group full">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="color:#333; margin:0;">Standard Medicines</label>
+            <button type="button" class="btn-main" style="padding:4px 8px; font-size:0.75rem;" onclick="addPresetMedicineRow()">+ Add Medicine</button>
+          </div>
+          <table class="rx-table">
+            <thead>
+              <tr>
+                <th>Drug Name</th>
+                <th>Dose</th>
+                <th>Freq</th>
+                <th>Days</th>
+                <th>Instructions</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="newPresetMedRows">
+              <tr>
+                <td><input type="text" class="rx-input p-name" placeholder="Drug name" required /></td>
+                <td><input type="text" class="rx-input p-dose" placeholder="e.g. 1 Tab" /></td>
+                <td><input type="text" class="rx-input p-freq" placeholder="1-0-1" /></td>
+                <td><input type="text" class="rx-input p-dur" placeholder="15 Days" /></td>
+                <td><input type="text" class="rx-input p-inst" placeholder="After food" /></td>
+                <td><button type="button" class="btn-del-row" onclick="this.closest('tr').remove()">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <button type="submit" class="btn-submit" style="background:var(--primary-green); color:#fff;">Save Disease Protocol</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Doctor -->
+  <div id="addDocModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAddDoctorModal()">&times;</button>
+      <h3 id="docModalTitle" style="font-family:var(--font-serif); margin-bottom:16px;">Add New Doctor Profile</h3>
+      <form id="addDocForm" class="booking-form">
+        <input type="hidden" id="editDocId" value="" />
+        <div class="form-group full">
+          <label style="color:#333;">Doctor Name</label>
+          <input type="text" id="newDocName" required placeholder="e.g. Dr. S. Sanjana Anand" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Qualifications</label>
+          <input type="text" id="newDocQual" required placeholder="e.g. M.B.B.S, M.D. (Dermatology)" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Consultation Timings</label>
+          <input type="text" id="newDocTimings" required placeholder="e.g. 10:00 AM – 1:00 PM & 5:00 PM – 8:00 PM" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Role / Specialty</label>
+          <input type="text" id="newDocRole" required placeholder="e.g. Consultant Dermatologist & Trichologist" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333; font-weight:600;">Doctor Photo (Leave empty to keep existing photo)</label>
+          <input type="file" id="newDocPhotoFile" accept="image/*" />
+        </div>
+        <button type="submit" id="docSubmitBtn" class="btn-submit" style="background:var(--primary-green); color:#fff;">Save Doctor Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Treatment -->
+  <div id="addTrtModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAddTreatmentModal()">&times;</button>
+      <h3 id="trtModalTitle" style="font-family:var(--font-serif); margin-bottom:16px;">Add Clinical Treatment</h3>
+      <form id="addTrtForm" class="booking-form">
+        <input type="hidden" id="editTrtId" value="" />
+        <div class="form-group full">
+          <label style="color:#333;">Treatment Name</label>
+          <input type="text" id="newTrtTitle" required placeholder="e.g. Carbon Laser Peel" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Category</label>
+          <input type="text" id="newTrtCategory" required placeholder="e.g. Laser Facial" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Highlight Badge</label>
+          <input type="text" id="newTrtBadge" placeholder="e.g. US-FDA Approved" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Description</label>
+          <textarea id="newTrtDesc" required placeholder="Brief clinical details..."></textarea>
+        </div>
+        <button type="submit" id="trtSubmitBtn" class="btn-submit" style="background:var(--primary-green); color:#fff;">Save Treatment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Before & After Result -->
+  <div id="addResModal" class="modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeAddResultModal()">&times;</button>
+      <h3 id="resModalTitle" style="font-family:var(--font-serif); margin-bottom:16px;">Add Before & After Case Study</h3>
+      <form id="addResForm" class="booking-form">
+        <input type="hidden" id="editResId" value="" />
+        <div class="form-group full">
+          <label style="color:#333;">Condition Title</label>
+          <input type="text" id="newResTitle" required placeholder="e.g. Severe Acne Scar Resurfacing" />
+        </div>
+        <div class="form-group full">
+          <label style="color:#333;">Procedure Protocol</label>
+          <input type="text" id="newResProc" required placeholder="e.g. 3 Sessions Fractional CO2 Laser" />
+        </div>
+        <div class="form-group">
+          <label style="color:#333; font-weight:600;">Upload Before Photo</label>
+          <input type="file" id="newResBeforeFile" accept="image/*" />
+          <small id="resBeforeHint" style="display:none; color:#666; font-size:0.75rem;">Leave empty to keep existing</small>
+        </div>
+        <div class="form-group">
+          <label style="color:#333; font-weight:600;">Upload After Photo</label>
+          <input type="file" id="newResAfterFile" accept="image/*" />
+          <small id="resAfterHint" style="display:none; color:#666; font-size:0.75rem;">Leave empty to keep existing</small>
+        </div>
+        <button type="submit" id="resSubmitBtn" class="btn-submit" style="background:var(--primary-green); color:#fff;">Save Case Study</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Formal Print Layout -->
+  <div id="printPrescriptionArea">
+    <div class="rx-print-header">
+      <div>
+        <h1>SRI SAI SKIN & HAIR CLINIC</h1>
+        <p style="font-size:0.9rem; color:#444;">Station Road, Near Puneeth Rajkumar Circle, Patil Nagar, Hospet-583201</p>
+        <p style="font-size:0.82rem; color:#666;">Phone: 9988443959 | 9988443818</p>
+      </div>
+      <div style="text-align: right;">
+        <h3 style="font-size:1.15rem; color:#183324;">Dr. S. Sanjana Anand</h3>
+        <p style="font-size:0.85rem; color:#555;">M.B.B.S, M.D. (Dermatology)</p>
+        <p style="font-size:0.8rem; color:#777;">Reg No: KMC-94218</p>
+      </div>
+    </div>
+
+    <div class="rx-patient-info">
+      <div><strong>Patient:</strong> <span id="printName"></span></div>
+      <div><strong>Age:</strong> <span id="printAge"></span> yrs</div>
+      <div><strong>Date:</strong> <span id="printDate"></span></div>
+      <div><strong>Patient ID:</strong> <span id="printId"></span></div>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <h4 style="font-size:0.95rem; text-transform:uppercase; color:#183324; margin-bottom:6px;">Diagnosis & Clinical Notes</h4>
+      <p id="printDiagnosis" style="font-size:0.95rem; background:#fafafa; padding:10px; border-left:3px solid #183324;"></p>
+    </div>
+
+    <h4 style="font-size:0.95rem; text-transform:uppercase; color:#183324; margin-bottom:8px;">Rx (Prescribed Medications)</h4>
+    <table class="rx-table-print">
+      <thead>
+        <tr>
+          <th>Medicine / Brand</th>
+          <th>Dosage</th>
+          <th>Frequency (M-A-N)</th>
+          <th>Duration</th>
+          <th>Instructions</th>
+        </tr>
+      </thead>
+      <tbody id="printMedicinesBody"></tbody>
+    </table>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:80px;">
+      <div style="font-size:0.8rem; color:#777;">
+        <p>• Review after 15 days or complete cycle.</p>
+        <p>• Avoid sun exposure without prescribed sunscreen.</p>
+      </div>
+      <div style="text-align:center;">
+        <p style="border-top:1px solid #222; padding-top:4px; font-weight:bold; width:200px;">Dr. S. Sanjana Anand</p>
+        <p style="font-size:0.75rem; color:#666;">Consulting Dermatologist</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="shared.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
